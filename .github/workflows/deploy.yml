@@ -3,18 +3,18 @@ name: Deploy FastAPI to EC2
 on:
   push:
     branches:
-      - main   
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      
+      # 1. Checkout repo (GitHub runner)
       - name: Checkout code
         uses: actions/checkout@v4
 
-      
+      # 2. Setup SSH key
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
@@ -22,24 +22,27 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts
 
-      
+      # 3. Deploy to EC2
       - name: Deploy to EC2
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} << 'EOF'
 
-          # Move to project directory
-          cd /home/ubuntu/task-manager   # change this path
+          set -e
 
-          # Pull latest code
-          git pull origin main
+          echo " Moving to project directory..."
+          cd /home/ubuntu/task-manager
 
-          # Stop containers
+          echo " Syncing code with GitHub..."
+          git fetch origin main
+          git reset --hard origin/main
+
+          echo " Restarting Docker containers..."
           docker compose down
-
-          # Rebuild and start containers
           docker compose up -d --build
 
-          # Cleanup old images (optional)
+          echo " Cleaning unused images..."
           docker image prune -f
+
+          echo " Deployment completed successfully"
 
           EOF

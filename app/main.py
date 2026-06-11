@@ -12,4 +12,4 @@ app.include_router(tasks.router)
 
 @app.get("/")
 def root():
-    return {"message": " Manager is live"}
+    return {"message": "Task Manager is live"}
