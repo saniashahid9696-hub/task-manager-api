@@ -18,7 +18,7 @@ services:
     volumes:
       - .:/code
     environment:
-      - DATABASE_URL=postgresql://user:pass@db:5432/taskdb
+      - DATABASE_URL=postgresql://sania:sania123@database-1.c1m4amweg1oe.us-west-2.rds.amazonaws.com:5432/taskdb
     depends_on:
       db:
         condition: service_healthy
